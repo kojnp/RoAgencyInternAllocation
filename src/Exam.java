@@ -237,8 +237,19 @@ public class Exam {
 		// Deci niciunul din ultimii 12 candidati nu vor fi repartizati la agentii unde sunt deja 2 repartizati. 
 		Exam.printSep();
 		allocateCandidates(30, 0, 3);
+		
+		System.out.println("after 30 candidates allocation, situation is:");
+		printAgenciesAndAllocation();
+		
 		allocateCandidates(12, 30, 2);
-
+		
+		System.out.println("after full pass of allocation, situation is:");
+		printAgenciesAndAllocation();
+		
+		lastPass();
+		
+		System.out.println("after last pass of allocation, situation is:");
+		printAgenciesAndAllocation();
 
 		Exam.printSep();
 		for (Candidate c : candidates){
@@ -253,9 +264,21 @@ public class Exam {
 		System.out.println("Repartizare finala");
 		System.out.println("primii 30 ca medie sunt repartizati unde vor, in ordinea preferintelor lor, \n avand in vedere sa fie max 3 per agentie.\n" + 
 				"		ultimii 12 sunt repartizati unde vor, in ordinea preferintelor, avand in vedere sa fie max 2 per agentie. \n" + 
-				"	Deci niciunul din ultimii 12 candidati ca medie nu au fost repartizati la agentii unde sunt deja 2 repartizati. ");
+				"	Deci niciunul din ultimii 12 candidati ca medie nu au fost repartizati la agentii unde sunt deja 2 repartizati. \n" +
+				" Apoi am mai facut o trecere sa gasesc vreunul nealocat.");
 		Exam.printSep();
 		
+		for (Agency a : agencies) {
+			Exam.printSep();
+			System.out.println("Agentia " + a.getName());
+			for (Candidate c : a.getInterns()) {
+				System.out.println(c.getEmail());
+			}
+		}
+	}
+	
+	private void printAgenciesAndAllocation() {
+		Exam.printSep();
 		for (Agency a : agencies) {
 			Exam.printSep();
 			System.out.println("Agentia " + a.getName());
@@ -284,6 +307,33 @@ public class Exam {
 				}
 			}
 		}
+	}
+	
+	// if any candidate left unallocated
+	private void lastPass() {
+		for (int i = 0; i < candidates.size(); i++) {// iterare in lista sortata deja descendent dupa punctaj
+			
+			Candidate c = candidates.get(i);
+			if (c.agentiaLaCareAFostAlocat != null) {
+				continue;
+			}
+			
+			Exam.printSep();
+			System.out.println("Candidat " + c.getEmail() + " was UNALLOCATED. Doing it now...");
+
+			String[] optiuni = candidates.get(i).getOptiuni();
+			for (int j = 0 ; j < 16 ; j++) {
+				System.out.println("optiunea " + j + " a fost " + optiuni[j]);
+				Agency a = agencies.get(agencies.indexOf(new Agency(optiuni[j])));
+				System.out.println("agentia " + a.getName() + " are acum " + a.getInterns().size() + " interni deja repartizati");
+				if (a.getInterns().size() < 3) {
+					System.out.println("Il alocam la agentia " + a.getName());
+					a.interns.add(candidates.get(i));
+					candidates.get(i).setAgentiaLaCareAFostAlocat(optiuni[j]);
+					break;
+				}
+			}
+		}		
 	}
 
 	public static void main(String[] args) {
